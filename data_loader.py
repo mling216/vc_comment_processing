@@ -2,7 +2,7 @@
 Data loader — the single place that knows how to fetch a sheet/table.
 
 Two ways to read the paired-comparison data (and any other tab):
-  1. from the **master** Google Sheet (live, always current)
+  1. from the configured Google Sheets (``source="master"``, live)
   2. from a **local copy** under data_table/ (offline, reproducible)
 
 Use `load_paired_comparison()` for the study table, or the generic
@@ -49,8 +49,9 @@ def load_sheet(spreadsheet_id: str, gid, source: str | None = None) -> pd.DataFr
 
 
 def load_paired_comparison(source: str | None = None) -> pd.DataFrame:
-    """Load the raw paired-comparison study table (0.postquestionare_all).
+    """Load PostquestionareAnalysisGPT5 / 0.postquestionare_all.
 
+    Returns raw records; this loader does not apply the ToRemove exclusion.
     This is the entry point of the pipeline and demonstrates the two read
     modes: ``load_paired_comparison("master")`` vs ``load_paired_comparison("local")``.
     """

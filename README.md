@@ -1,9 +1,18 @@
 # VC Comment Processing
 
 Turns raw visual-complexity (VC) user comments into curated phrases, sub-topics,
-and a final keyword/stem dictionary. The workflow combines LLM extraction,
-spreadsheet-based human curation, algorithmic phrase reduction, and per-image
-compilation.
+and a final keyword/stem dictionary. Conceptually, the workflow has three
+phases: LLM-assisted classification into seven topics and phrase extraction; expert curation,
+consolidation, reduction, and subtopic construction; and image-level mapping
+with dictionary and optional reporting outputs. The notebooks expose the operational steps and
+spreadsheet checkpoints for these phases.
+
+For a standalone, researcher-facing account, see
+[From Participant Comments to a Visual-Complexity Vocabulary](RESEARCH_WORKFLOW.md).
+The overview uses the same spreadsheet names, checkpoints, and reported counts
+as this execution guide.
+
+![VC comment-processing pipeline with human review checkpoints and two downstream branches](docs/vc_comment_pipeline.svg)
 
 ## Workbook, tab, and GID convention
 
@@ -20,18 +29,25 @@ loader call is:
 df = load_sheet(spreadsheet_id, gid)
 ```
 
-The repository currently uses these workbook contexts:
+The repository uses these workbook contexts. Titles and tab names were checked
+against the live spreadsheets on November 23, 2026.
 
-| Workbook context | Spreadsheet ID | Tabs used |
+| Spreadsheet name and role | Spreadsheet ID | Tabs used |
 | --- | --- | --- |
-| Source and legacy keyword workbook | `1gfeYdT-RxLq9tvNpfv_P8AIKg2eSz6-8bSv5zUJsWEc` | `gid 1103808983` source pairs; `gid 1166121277` phrase/keyword mapping; `gid 1841871821` prior keyword table; `gid 1390591889` image topics; `gid 1160817631` keyword counts |
-| Current reduction workbook | `1cVCOfBjHmcvsyrn7U0CbXoBSksF4JDRqWYm-ZJPbL4k` | `gid 517808299` curated phrases; `gid 1455332435` term mapping; `gid 1540814304` image pairs; `gid 483858074` canonical image list |
-| Image order workbook | `1gfeYdT-RxLq9tvNpfv_P8AIKg2eSz6-8bSv5zUJsWEc` | `gid 1429789806` canonical order used by notebook 4 |
-| VC score workbook | `1N6nK03QiPAM6AELb9kC3beETnKmG6u23` | `gid 67202923` normalized VC values |
+| PostquestionareAnalysisGPT5: source comments, earlier mappings, summaries, and image order | `1gfeYdT-RxLq9tvNpfv_P8AIKg2eSz6-8bSv5zUJsWEc` | `0.postquestionare_all` (gid `1103808983`); `1.keyword.S&Y(AI+humanCuration)` (gid `1166121277`); `Expired.1.keyword.Z&AA(AI+humanCuration)` (gid `1841871821`); `5.imageTypeTopics` (gid `1390591889`); `2.keyword.CountByVisTypes` (gid `1160817631`); `5.1 imagePhraseCompile` (gid `1429789806`) |
+| ResultsStepByStep: current reduction and per-image inputs | `1cVCOfBjHmcvsyrn7U0CbXoBSksF4JDRqWYm-ZJPbL4k` | `2.curatedPhrases` (gid `517808299`); `1.phraseCuration` (gid `1455332435`); `0.postquestionare_all` (gid `1540814304`); `4.0.imageDataCompiled` (gid `483858074`) |
+| VisComplexity.PerceivedScoreAndObjectiveMetrics: image metadata used by notebook 1 | `1eJ3VUh2ZKZy6S6qo9nzF8h0rwwMNBhwuK42wdgeS54w` | `FormalExp1800Images` (gid `1073958835`), including image visualization types |
+| Sub.Vis2025VisComplexity.PerceivedScoreAndObjectiveMetrics: VC score reference | `1N6nK03QiPAM6AELb9kC3beETnKmG6u23` | `FormalExp1800Images` (gid `67202923`), including normalized VC values |
 
-The first two contexts are not interchangeable just because a tab number looks
-similar. When adding a new reference, record both the spreadsheet ID and the
-gid, and prefer the variable name `gid` in new code.
+The first two spreadsheets each have a `0.postquestionare_all` tab, but these
+are separate inputs and are not automatically synchronized. Likewise, the
+earlier mapping tab in PostquestionareAnalysisGPT5 is not the
+`1.phraseCuration` tab in ResultsStepByStep. Record both workbook and tab for
+every handoff; prefer the variable name `gid` in new code.
+
+Historical references to `1.phraseCuration` at gid `1166121277`,
+`6.imageTypeTopics` at gid `1390591889`, and `A.keyword.CountByVisTypes` at gid
+`1160817631` refer to the current PostquestionareAnalysisGPT5 names above.
 
 ## Pipeline at a glance
 
@@ -44,7 +60,8 @@ those files back to Google Sheets.
 CORE PATH
 
 0. Source study data
-   Read:  0.postquestionare_all (gid `1103808983`)
+   Read:  PostquestionareAnalysisGPT5 / 0.postquestionare_all (gid `1103808983`)
+   Apply ToRemove: 698 nonempty records -> 685 retained records.
    Local: data_table/paired_comparison.csv
       |
       v
@@ -54,24 +71,28 @@ CORE PATH
       |
       v
 2. HUMAN CURATION CHECKPOINT
-   Edit in 0.postquestionare_all (gid `1103808983`):
+   Edit in PostquestionareAnalysisGPT5 / 0.postquestionare_all (gid `1103808983`):
      CuratePhrasesMoreComplex
      CuratePhrasesLessComplex
-   Review topic assignments, phrase wording, and (+)/(-) sentiment.
+   Review topic assignments, phrase wording, image attribution, and (+)/(-)
+   complexity direction (not positive/negative emotion).
       |
       v
 3. Phrase mapping: notebook 2
-   Read:  0.postquestionare_all (gid `1103808983`)
-      1.phraseCuration (gid `1166121277`) for existing mappings
+   Read:  PostquestionareAnalysisGPT5 / 0.postquestionare_all (gid `1103808983`)
+      and 1.keyword.S&Y(AI+humanCuration) (gid `1166121277`) for existing mappings.
    Write: data_processing/term_mapping_regenerated.csv
       data_processing/phrase_pivot_regenerated.csv
-   Review and refresh 1.phraseCuration, especially `AIcurated` and
-   `HumanCuration`, then refresh 2.curatedPhrases (gid `517808299`).
+   Review and refresh 1.keyword.S&Y(AI+humanCuration), especially `AIcurated`
+   and `HumanCuration`, then refresh ResultsStepByStep / 2.curatedPhrases
+   (gid `517808299`).
       |
       v
 4. Phrase reduction: notebook 3
-   Read:  2.curatedPhrases (gid `517808299`), plus reduction-workbook tabs
-      when running the per-image section.
+   Read:  ResultsStepByStep / 2.curatedPhrases (gid `517808299`).
+   Per-image section also reads that workbook's 1.phraseCuration
+      (gid `1455332435`), 0.postquestionare_all (gid `1540814304`), and
+      4.0.imageDataCompiled (gid `483858074`); refresh these inputs as needed.
    Review the manual synonym groups, shortlist, and sub-topic taxonomy.
    Write: phrase_shortlist.csv, subtopic_taxonomy.csv,
       phrase_reduction_tracking.csv, image_phrase_word_mapping.csv
@@ -81,7 +102,7 @@ DOWNSTREAM BRANCH A: IMAGE COMPILATION
 5A. notebook 4
     Requires the notebook 3 outputs plus external
     data_processing/image_compiled_phrases.csv,
-    data_processing/term_mapping.csv, and (for some cells) a prior
+    data_processing/term_mapping.csv, and a prior
     data_processing/stem_dictionary.csv. See "External artifacts" below.
     Write: image_compiled_phrases.csv, stem_dictionary.csv, and reports.
 
@@ -89,7 +110,8 @@ DOWNSTREAM BRANCH B: WORD AND STEM TABLES
 
 5B. notebook 5
     Requires data_processing/term_mapping.csv. Its later cells also read
-    source tabs `gid 1103808983` and `gid 1166121277` to build image matching.
+    PostquestionareAnalysisGPT5 / 0.postquestionare_all (gid `1103808983`)
+    and 1.keyword.S&Y(AI+humanCuration) (gid `1166121277`) for image matching.
     Write: unique_words.csv, image_phrase_matching.csv, unique_words_by_*.csv
       |
       v
@@ -100,8 +122,9 @@ DOWNSTREAM BRANCH B: WORD AND STEM TABLES
 
 OPTIONAL WORKBOOK HANDOFF
 
-Refresh 6.imageTypeTopics (gid `1390591889`) from compiled per-image results,
-then refresh A.keyword.CountByVisTypes (gid `1160817631`) when needed.
+In PostquestionareAnalysisGPT5, refresh 5.imageTypeTopics (gid `1390591889`)
+from compiled per-image results, then 2.keyword.CountByVisTypes
+(gid `1160817631`) when needed.
 ```
 
 ## Human curation checkpoints
@@ -109,16 +132,19 @@ then refresh A.keyword.CountByVisTypes (gid `1160817631`) when needed.
 Human curation happens after the first notebook has produced or refreshed the AI
 extraction fields and before phrase reduction:
 
-1. In `0.postquestionare_all` (`1103808983`), review the extracted phrases for
+1. In PostquestionareAnalysisGPT5 / `0.postquestionare_all` (gid `1103808983`), review the extracted phrases for
    each more-complex and less-complex image. Store the reviewed topic-to-phrase
    JSON in `CuratePhrasesMoreComplex` and `CuratePhrasesLessComplex`.
 2. Run `2_phrase_curation.ipynb`. It collects all reviewed phrases from the
-   source tab and preserves existing mappings from `1.phraseCuration`.
-3. Review the generated `HumanCuration` labels in `1.phraseCuration`
+   source tab and preserves existing mappings from that workbook's
+   `1.keyword.S&Y(AI+humanCuration)`.
+3. Review the generated `HumanCuration` labels in `1.keyword.S&Y(AI+humanCuration)`
    (gid `1166121277`). This is the mapping from each original phrase to the final
    human-curated phrase used downstream.
-4. Refresh `2.curatedPhrases` (gid `517808299`) with the curated phrase table before
-   running `3_phrase_reduction.ipynb`.
+4. Refresh ResultsStepByStep / `2.curatedPhrases` (gid `517808299`) with the
+   curated phrase table before running `3_phrase_reduction.ipynb`. For its
+   per-image section, also refresh ResultsStepByStep / `1.phraseCuration`
+   (gid `1455332435`) with the intended reviewed mappings.
 5. During notebook 3, review manual synonym groups, the phrase shortlist, and
    the sub-topic taxonomy. Do not treat the TF-IDF suggestions as a substitute
    for expert review.
@@ -127,12 +153,13 @@ extraction fields and before phrase reduction:
 
 | Stage | Extract/read from | Manually write or paste back | Local artifact |
 | --- | --- | --- | --- |
-| Raw study data | `0.postquestionare_all`, gid `1103808983` | None before notebook 1 | `data_table/paired_comparison.csv` |
-| AI phrase extraction | Source rows and comment columns in `0.postquestionare_all` | AI extraction columns in the same source tab, aligned by `index` | `data_processing/extracted_*.csv`, `CuratedPhrasesCombined.csv` |
-| Human phrase review | `CuratePhrasesMoreComplex` and `CuratePhrasesLessComplex` in `0.postquestionare_all` | Reviewed JSON phrase assignments in those same columns | `data_processing/term_mapping_regenerated.csv` |
-| Phrase mapping review | `1.phraseCuration`, gid `1166121277` | `AIcurated` and `HumanCuration` values | `data_table/phrase_curation.csv` for the shipped local copy |
-| Reduction input | `2.curatedPhrases`, gid `517808299` | Refresh the curated phrase/count table | `data_table/curated_phrases.csv` for the shipped local copy |
-| Per-image workbook refresh | Compiled outputs from notebooks 3-4 | Optional refresh of `6.imageTypeTopics`, gid `1390591889` | `image_compiled_phrases.csv` and summaries |
+| Raw study data | PostquestionareAnalysisGPT5 / `0.postquestionare_all`, gid `1103808983` | None before notebook 1 | `data_table/paired_comparison.csv` |
+| AI phrase extraction | Source rows and comment columns in that source tab | AI extraction columns in the same tab, aligned by `index` | `data_processing/extracted_*.csv`, `CuratedPhrasesCombined.csv` |
+| Human phrase review | `CuratePhrasesMoreComplex` and `CuratePhrasesLessComplex` in that source tab | Reviewed JSON phrase assignments in those same columns | `data_processing/term_mapping_regenerated.csv` |
+| Phrase mapping review | PostquestionareAnalysisGPT5 / `1.keyword.S&Y(AI+humanCuration)`, gid `1166121277` | `AIcurated` and `HumanCuration` values | `data_table/phrase_curation.csv` for the shipped local copy |
+| Reduction input | ResultsStepByStep / `2.curatedPhrases`, gid `517808299` | Refresh the curated phrase/count table | `data_table/curated_phrases.csv` for the shipped local copy |
+| Per-image mapping input | ResultsStepByStep / `1.phraseCuration`, gid `1455332435` | Refresh the intended reviewed mapping | Live workbook input; no registered local snapshot |
+| Per-image workbook refresh | Compiled outputs from notebooks 3-4 | Optional refresh of PostquestionareAnalysisGPT5 / `5.imageTypeTopics`, gid `1390591889` | `image_compiled_phrases.csv` and summaries |
 
 ## External artifacts
 
@@ -142,7 +169,7 @@ Before running the downstream branches, confirm that these files exist under
 
 | File | Consumed by | Required columns or role |
 | --- | --- | --- |
-| `term_mapping.csv` | notebooks 4 and 5 | Phrase mapping with `Original`, `AIcurated`, `HumanCurated`; notebook 4 also uses `OriginalSign` for sentiment lookup |
+| `term_mapping.csv` | notebooks 4 and 5 | Notebook 5 reads `Original`, `AIcurated`, `HumanCurated`; notebook 4 core reads lowercase `original` and `OriginalSign`. A shared export must include both `original` and `Original` with identical phrase values. Optional notebook 4 sentiment reports also use `HumanCurated` and `HumanCuratedSign`. |
 | `image_compiled_phrases.csv` | notebook 4 | Existing per-image phrase table used as the compilation source |
 | `stem_dictionary.csv` | notebook 4 setup and later dictionary cells | Existing or previously generated original-stem dictionary |
 | `phrase_lineage_all_vistypes.csv` | notebook 6 lineage section | Mapping from `original_phrase` to `final_subtopic_phrase` |
@@ -154,6 +181,11 @@ notebooks. Likewise, `phrase_lineage_all_vistypes.csv` is not produced by the
 current notebook 3 cells and must be supplied if the notebook 6 lineage report
 is needed.
 
+Column names are case-sensitive. The reviewed workbook field is
+`HumanCuration`, while the downstream long-format file uses `HumanCurated`;
+adapt these names explicitly at export. The notebooks do not currently
+normalize the two original-phrase column spellings automatically.
+
 When using local mode, update the corresponding CSV under `data_table/` after
 making a spreadsheet change. `data_processing/` is ignored by Git because its
 contents are regenerated by the notebooks.
@@ -162,18 +194,24 @@ contents are regenerated by the notebooks.
 
 | Quantity | Value |
 | --- | --- |
-| Comparison pairs (comments) | 699 (686 kept after `ToRemove`) |
+| Comparison pairs (comments) | 698 nonempty rows (685 kept after `ToRemove`) |
 | Unique images | 520 |
 | VC topics / VisTypes | 7 / 9 |
 | Curated phrases | 404 |
 | Keywords entering reduction | 399 |
-| Sub-topics after reduction | 19 (3/3/3/3/3/2/2 per topic) |
+| Sub-topics after reduction | 19 (3/3/3/3/2/2/3 per topic) |
 | Dictionary stems | 689 (668 user-comment + 21 literature) |
 
 The 7 topics are Data Density / Image Clutter (DDIC), Visual Encoding Clarity
 (VEC), Semantics / Text Legibility (STL), Schema (SCH), Color, Symbol, and
 Texture Details (CSTD), Aesthetics Uncertainty (AU), and Immediacy / Cognitive
 Load (ICL).
+
+These figures are reported workflow totals, not results of a fresh run.
+Comparison records are not participant counts; the 404 curated phrases and
+399 reduction-input keywords refer to different stages. The 689-stem total
+includes literature contributions and is not a guaranteed notebook output
+size on every rerun.
 
 ## Reading the data: two ways
 
@@ -201,6 +239,11 @@ unmapped or missing local tab prints a message and falls back to the live
 Google Sheet. Sheet IDs, tab mappings, topic names, VisTypes, and folder
 locations are defined in `config.py`.
 
+Here `"master"` means live Google Sheets, not that every table comes from
+ResultsStepByStep. `load_paired_comparison()` reads PostquestionareAnalysisGPT5.
+Local lookup is currently keyed by gid only, so a registered local snapshot
+does not verify its workbook ID; use the documented workbook/gid pairs.
+
 ## Notebook summary
 
 | # | Notebook | Purpose | Main outputs |
@@ -210,7 +253,7 @@ locations are defined in `config.py`.
 | 3 | `3_phrase_reduction.ipynb` | Reduce the reviewed vocabulary into named sub-topics | `phrase_shortlist.csv`, `subtopic_taxonomy.csv`, `phrase_reduction_tracking.csv` |
 | 4 | `4_image_compilation.ipynb` | Downstream branch A: compile per-image phrases, sentiments, stems, sub-topics, and reporting tables | `image_compiled_phrases.csv`, `stem_dictionary.csv` |
 | 5 | `5_keyword_extraction.ipynb` | Downstream branch B: create lemmatized word tables and image phrase matching | `unique_words*.csv`, `image_phrase_matching.csv` |
-| 6 | `6_keyword_stems.ipynb` | Continue branch B with Snowball stem tables; the final-phrase lineage section needs an additional lineage CSV | `unique_stems*.csv` |
+| 6 | `6_keyword_stems.ipynb` | Continue branch B with Snowball stem tables; the optional final-phrase lineage section needs an additional lineage CSV | `unique_stems*.csv` |
 
 ## Layout
 
@@ -221,6 +264,8 @@ requirements.txt
 data_table/          local CSV copies of key Google Sheet tabs
 data_processing/     notebook outputs (Git-ignored)
 notebooks/           1..6 pipeline notebooks
+RESEARCH_WORKFLOW.md  standalone researcher-facing method and supplement
+docs/                shared SVG pipeline diagram
 ```
 
 ## Setup

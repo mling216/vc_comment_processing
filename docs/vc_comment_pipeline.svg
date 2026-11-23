@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1030" viewBox="0 0 1000 1030" role="img" aria-labelledby="title description">
+  <title id="title">From participant comments to a visual-complexity vocabulary</title>
+  <desc id="description">Six research stages: prepare 698 nonempty comparison records, retaining 685; extract exact phrases under seven topics with AI assistance; review phrases in context; review the standardized vocabulary of 404 curated phrases; consolidate 399 reduction-input keywords into 19 sub-topics; then choose image compilation or word and stem tables, or both. Human review is required at stages three, four, and five. The reported combined dictionary contains 689 stems: 668 from participant comments and 21 from literature. Spreadsheet exports and external inputs are manual handoffs, not automatic synchronization.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 1 1 L 9 5 L 1 9 Z" fill="#475569"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172b4d; }
+      .heading { font-size: 26px; font-weight: 700; }
+      .label { font-size: 22px; font-weight: 700; }
+      .body { font-size: 18px; }
+      .small { font-size: 16px; }
+      .badge { font-size: 15px; font-weight: 700; fill: #7c4500; }
+      .connector { fill: none; stroke: #475569; stroke-width: 2.5; marker-end: url(#arrow); }
+      .automatic { fill: #edf4fc; stroke: #527da8; stroke-width: 1.5; }
+      .review { fill: #fff6e7; stroke: #b7791f; stroke-width: 1.5; }
+      .output { fill: #ecf7f2; stroke: #46846c; stroke-width: 1.5; }
+    </style>
+  </defs>
+  <rect width="1000" height="1030" fill="#ffffff"/>
+  <text x="500" y="37" text-anchor="middle" class="heading">Visual-complexity comment-processing workflow</text>
+  <text x="500" y="62" text-anchor="middle" class="small">AI assistance + expert curation + image-linked outputs</text>
+
+  <rect x="70" y="85" width="860" height="100" rx="12" class="automatic"/>
+  <text x="95" y="117" class="label">1. Prepare participant-comment records</text>
+  <text x="95" y="146" class="body">698 nonempty comparisons -&gt; 685 retained records</text>
+  <text x="95" y="171" class="body">520 images; 9 visualization types; preserve comment-to-image links</text>
+  <path d="M 500 185 V 213" class="connector"/>
+
+  <rect x="70" y="215" width="860" height="90" rx="12" class="automatic"/>
+  <text x="95" y="247" class="label">2. AI-assisted topic and phrase extraction</text>
+  <text x="95" y="278" class="body">7 predefined topics; exact wording; image attribution; complexity direction (+/-)</text>
+  <path d="M 500 305 V 333" class="connector"/>
+
+  <rect x="70" y="335" width="860" height="90" rx="12" class="review"/>
+  <text x="95" y="367" class="label">3. Review phrases in context</text>
+  <rect x="760" y="350" width="145" height="29" rx="14" fill="#fce5bb"/>
+  <text x="832" y="370" text-anchor="middle" class="badge">HUMAN REVIEW</text>
+  <text x="95" y="398" class="body">Check original evidence, topics, image attribution, direction, and coverage</text>
+  <path d="M 500 425 V 453" class="connector"/>
+
+  <rect x="70" y="455" width="860" height="90" rx="12" class="review"/>
+  <text x="95" y="487" class="label">4. Review the standardized vocabulary</text>
+  <rect x="760" y="470" width="145" height="29" rx="14" fill="#fce5bb"/>
+  <text x="832" y="490" text-anchor="middle" class="badge">HUMAN REVIEW</text>
+  <text x="95" y="518" class="body">404 curated phrases; preserve original-to-curated mappings and refresh inputs</text>
+  <path d="M 500 545 V 573" class="connector"/>
+
+  <rect x="70" y="575" width="860" height="105" rx="12" class="review"/>
+  <text x="95" y="607" class="label">5. Consolidate phrases and define sub-topics</text>
+  <rect x="760" y="590" width="145" height="29" rx="14" fill="#fce5bb"/>
+  <text x="832" y="610" text-anchor="middle" class="badge">HUMAN REVIEW</text>
+  <text x="95" y="638" class="body">399 reduction-input keywords -&gt; 19 sub-topics across 7 topics</text>
+  <text x="95" y="663" class="small">Expert synonym groups + similarity suggestions; review taxonomy and tracking</text>
+
+  <path d="M 500 680 V 709 H 275 V 755" class="connector"/>
+  <path d="M 500 709 H 725 V 755" class="connector"/>
+  <rect x="357" y="716" width="286" height="28" fill="#ffffff"/>
+  <text x="500" y="736" text-anchor="middle" class="small">Choose either branch or both</text>
+
+  <rect x="70" y="757" width="410" height="167" rx="12" class="output"/>
+  <text x="95" y="791" class="label">6A. Image compilation</text>
+  <text x="95" y="822" class="body">Image-linked phrases and sub-topics</text>
+  <text x="95" y="848" class="body">Dictionary and optional reports</text>
+  <text x="95" y="878" class="small">Reported combined dictionary: 689 stems</text>
+  <text x="95" y="902" class="small">668 participant-comment + 21 literature</text>
+
+  <rect x="520" y="757" width="410" height="167" rx="12" class="output"/>
+  <text x="545" y="791" class="label">6B. Word and stem tables</text>
+  <text x="545" y="822" class="body">Word extraction and image matching</text>
+  <text x="545" y="848" class="body">Stem tables by topic and image type</text>
+  <text x="545" y="878" class="small">Optional lineage needs an additional input</text>
+
+  <rect x="70" y="948" width="860" height="60" rx="10" fill="#f8fafc" stroke="#64748b" stroke-dasharray="5 4"/>
+  <text x="500" y="973" text-anchor="middle" class="small">Arrows are research handoffs, not automatic spreadsheet synchronization.</text>
+  <text x="500" y="996" text-anchor="middle" class="small">Downstream branches also require separately supplied tables; see the supplement.</text>
+</svg>

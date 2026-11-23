@@ -23,12 +23,11 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # ---------------------------------------------------------------------------
 DATA_SOURCE = os.environ.get("VC_DATA_SOURCE", "master")
 
-# Latest master workbook (Google Sheet ID). Confirmed current source of truth.
+# ResultsStepByStep: current reduction workbook, not the initial comment source.
 MASTER_SHEET_ID = "1cVCOfBjHmcvsyrn7U0CbXoBSksF4JDRqWYm-ZJPbL4k"
 
-# The paired-comparison table (raw study output: one row per image pair).
-# The notebooks historically read this from an earlier copy of the workbook;
-# both the master and the local copy expose the same "0.postquestionare_all" tab.
+# PostquestionareAnalysisGPT5 / 0.postquestionare_all: initial comment source.
+# ResultsStepByStep has a separate tab with this name (gid 1540814304).
 PAIRED_SHEET_ID = "1gfeYdT-RxLq9tvNpfv_P8AIKg2eSz6-8bSv5zUJsWEc"
 PAIRED_GID = "1103808983"
 
@@ -36,9 +35,9 @@ PAIRED_GID = "1103808983"
 # Only tabs that have a shipped local copy need to appear here; everything else
 # falls back to the Google export URL automatically.
 LOCAL_SHEET_MAP = {
-    "1103808983": "paired_comparison.csv",   # 0.postquestionare_all
-    "517808299":  "curated_phrases.csv",     # 2.curatedPhrases (reduction input)
-    "1166121277": "phrase_curation.csv",     # 1.phraseCuration (AI/HC mapping)
+    "1103808983": "paired_comparison.csv",   # PostquestionareAnalysisGPT5 / 0.postquestionare_all
+    "517808299":  "curated_phrases.csv",     # ResultsStepByStep / 2.curatedPhrases
+    "1166121277": "phrase_curation.csv",     # PostquestionareAnalysisGPT5 / 1.keyword.S&Y(AI+humanCuration)
 }
 
 # ---------------------------------------------------------------------------
