@@ -1,34 +1,34 @@
 # From Participant Comments to a Visual-Complexity Vocabulary
 
-## Background and purpose
+## Background
 
-When people compare visualization images, their explanations reveal what makes an image seem more or less complex: crowded marks, unclear encodings, unfamiliar forms, or the effort needed to interpret it. Organizing these explanations makes it possible to study perceived visual complexity (VC) while retaining the participants' own words.
+Participants describe visual complexity in concrete terms: overlapping marks, hard-to-read labels, unfamiliar forms, or the time needed to understand an image. These comments help explain what a complexity judgment means to the person making it.
 
-This document describes that process: **AI-assisted extraction, expert curation, and image-level mapping**. AI proposes passages and assignments to seven predefined topics; researchers review the evidence, standardize equivalent expressions, and construct sub-topics. It is a guide to the research method, not a coding tutorial or an independent validation study.
+The analysis organizes those explanations into a vocabulary of perceived visual complexity (VC). A large language model (LLM) identifies relevant passages and proposes assignments to seven predefined topics. Researchers check the passages against the comments, bring similar expressions together, and group them into sub-topics. The resulting vocabulary remains linked to the original comments and images.
 
-The implementation and analysis materials are maintained in the [VC Comment Processing repository](https://github.com/mling216/vc_comment_processing) [1]. Reported counts follow its workflow documentation [2]. The main text can be read independently; the supplement supplies spreadsheet references and reproduction details.
+The code and selected data tables are available in [VC Comment Processing](https://github.com/mling216/vc_comment_processing) [1]. Its workflow documentation records the study and dictionary totals [2].
 
-## 1. Study materials and key numbers
+## 1. Study data and vocabulary
 
-Participants compared pairs of visualization images and explained why one appeared more or less visually complex.
+Participants compared pairs of visualization images and explained why one appeared more or less visually complex. Each comparison record contains the image pair and the associated comments. Of 698 nonempty records, 685 remain after the study's exclusion flag is applied.
 
-| Study or processing quantity | Reported number |
+| Quantity | Count |
 | --- | --- |
-| Nonempty comparison-pair records | 698 |
-| Comparison-pair records retained after the exclusion flag was applied | 685 |
-| Unique visualization images | 520 |
+| Nonempty comparison records | 698 |
+| Retained comparison records | 685 |
+| Images in the canonical reference list | 520 |
 | Broad visual-complexity topics | 7 |
-| Visualization types | 9 |
-| Curated phrases | 404 |
-| Keywords entering phrase reduction | 399 |
-| Sub-topics after reduction | 19 |
-| Dictionary stems | 689: 668 from participant comments and 21 from the literature |
+| Standard visualization-type categories used in summaries | 9 |
+| Curated topic–phrase entries | 404 |
+| Distinct curated phrases entering reduction | 399 |
+| Named sub-topics | 19 |
+| Reported combined dictionary stems | 689: 668 from participant comments and 21 from the literature |
 
-These are reported workflow totals [2], not newly computed results. Comparison records are not participant counts. The 404 curated phrases and 399 reduction-input keywords describe different stages. The combined dictionary total includes literature contributions and is not a guaranteed output size on rerun.
+These counts describe different units. A comparison record is not a participant. The 520-image canonical list provides a fixed reference for matching and ordering the image-level results; it is a subset of the images named in the source records. The curated table has 404 topic–phrase entries but 399 distinct phrases because five phrases each belong to two topics.
 
 ### The seven topics
 
-| Topic | What it captures, in plain language | Final sub-topics |
+| Topic | Aspect of visual complexity | Final sub-topics |
 | --- | --- | --- |
 | Data Density / Image Clutter (DDIC) | How much information is shown, how many elements appear, and whether they overlap or crowd one another | 3 |
 | Visual Encoding Clarity (VEC) | How clearly graphical forms, positions, and other visual marks communicate the data | 3 |
@@ -39,52 +39,64 @@ These are reported workflow totals [2], not newly computed results. Comparison r
 | Immediacy / Cognitive Load (ICL) | The difficulty, time, and mental effort involved in understanding the visualization | 3 |
 | **Total** | | **19** |
 
-## 2. Pipeline overview
+## 2. From comments to image-level results
 
 ![Pipeline from comparison comments through AI extraction and human review to sub-topics, image compilation, and word/stem tables](docs/vc_comment_pipeline.svg)
 
-**Figure 1.** The core sequence includes three human-review checkpoints: contextual phrase review, vocabulary review, and consolidation/taxonomy review. After reduction, collaborators can choose image compilation, word/stem tables, or both. Arrows represent research handoffs, not automatic spreadsheet synchronization; downstream analysis also requires separately supplied inputs.
+**Figure 1.** Comments pass through extraction, phrase review, vocabulary curation, and sub-topic construction. Researchers review the original passages, the standardized wording, and the final groupings. The two downstream branches produce image-level summaries and word/stem tables. Files are transferred between stages; the arrows do not indicate automatic spreadsheet updates.
 
-## 3. Research steps and spreadsheet checkpoints
+## 3. Processing steps
 
-Two primary spreadsheets organize the work: **PostquestionareAnalysisGPT5** holds source comments and earlier mappings; **ResultsStepByStep** holds reduction and per-image inputs. Both contain a **0.postquestionare_all** tab, so identify the spreadsheet as well as the tab. Auxiliary image-metadata and VC-score spreadsheets are listed in Supplement A.
+The work uses two main spreadsheets. PostquestionareAnalysisGPT5 holds the source comments and earlier phrase mappings. ResultsStepByStep holds the curated vocabulary and image-level reference tables. Both have a tab called 0.postquestionare_all, so the spreadsheet name matters. Supplement A lists the tables and the additional image-metadata and VC-score references.
 
 ### 1. Prepare the comment records
 
-Use PostquestionareAnalysisGPT5 → **0.postquestionare_all**. Each record connects an image pair to the participant's explanation. Apply the study's exclusion flag, retaining **685 of 698** nonempty records. Preserve original comments, image identifiers, and the **index** record key when copying results back.
+The starting point is PostquestionareAnalysisGPT5 → 0.postquestionare_all. Records marked for exclusion are removed before extraction. The remaining records retain the comments, image identifiers, and index key that connect each later annotation to its source.
 
 ### 2. Extract topics and phrases with AI assistance
 
-Assign comments to the seven predefined topics and extract **exact participant wording**. A passage may support multiple topics. Keep its image attribution and complexity direction: **(+) increased complexity; (-) decreased complexity**. These signs are not emotional sentiment and must be interpreted from the comment, not merely the image's comparison label. Return extraction fields to the source tab, matched by **index**.
+The LLM identifies the topics discussed in each comment and extracts the relevant words or phrases without paraphrasing them. A passage may support more than one topic: a comment about overlapping labels, for example, may concern both clutter and text legibility.
+
+Each passage is linked to the image it describes and marked (+) for increased complexity or (-) for decreased complexity. The sign records the participant's explanation, not whether the feature is generally good or bad. It also cannot be inferred solely from which image was chosen as more complex. Extraction results are copied back to the source tab using the index key.
 
 ### 3. Review phrases in context
 
-In the same source tab, researchers check evidence, topic, image attribution, direction, and coverage against the original comment. Record approved assignments in **CuratePhrasesMoreComplex** and **CuratePhrasesLessComplex**. Complete this review before standardizing the vocabulary.
+Researchers read each extracted passage alongside the original comment. They check whether the words were quoted correctly, whether the topic assignment fits, and whether the image and complexity sign are correct. They also look for relevant wording that was missed.
+
+Approved topic–phrase assignments are stored in CuratePhrasesMoreComplex and CuratePhrasesLessComplex in the source tab. This review comes before vocabulary curation, so the original wording is checked before expressions are combined or renamed.
 
 ### 4. Review the standardized vocabulary
 
-Review original-to-curated mappings in PostquestionareAnalysisGPT5 → **1.keyword.S&Y(AI+humanCuration)**, preserving the original wording as evidence. Refresh ResultsStepByStep → **2.curatedPhrases** with the approved phrase/count table. Its separate **1.phraseCuration** tab must also contain the intended mapping for per-image analysis. These are deliberate exports or copy-back steps, not automatic updates.
+Curation brings different expressions of the same idea under a consistent label. An original phrase is what the participant said; a curated phrase is the standardized wording used in the vocabulary. The mapping between them is retained so readers can trace a label back to the comments that support it.
+
+Researchers review these mappings in PostquestionareAnalysisGPT5 → 1.keyword.S&Y(AI+humanCuration). The approved phrase and count table is then transferred to ResultsStepByStep → 2.curatedPhrases. For image-level analysis, that spreadsheet's separate 1.phraseCuration tab also needs the reviewed mapping.
 
 ### 5. Consolidate phrases into 19 sub-topics
 
-Starting from ResultsStepByStep → **2.curatedPhrases**, combine expert synonym groups, text-similarity suggestions, and semantic review. Rare expressions are initially merged rather than simply discarded; terms are not excluded merely for being specific to one visualization type.
+Reduction begins with the 399 distinct phrases in ResultsStepByStep → 2.curatedPhrases. Expert-defined synonym groups combine closely related expressions. Text similarity is then used to match remaining rare phrases to more frequent candidates, usually within the same topic. Even weak matches can be assigned automatically, so those decisions need close review.
 
-The prioritization score is **phrase count × number of visualization types**. It summarizes frequency and breadth, not conceptual validity. Researchers inspect weak or forced merges, approve **19 sub-topics across seven topics**, and review the tracking table, including unmapped expressions [3]. Supplement B lists the sub-topics.
+The reduction also removes empty entries and checks specified pairs of opposite expressions for redundancy. Phrases specific to one visualization type are retained when they describe a relevant visual property.
+
+A phrase's ranking score multiplies its image-association count—the recorded links between that phrase and images—by the number of visualization types in which it appears. This favors phrases linked to many images and used across several types. The score helps order the vocabulary; researchers decide the conceptual groupings.
+
+The taxonomy contains 19 named sub-topics across the seven broad topics [3]. A sub-topic groups related curated phrases under a concept such as Information Volume or Typography & Readability. The tracking table records merges, exclusions, and assignments, including phrases that remain unmapped. The full list of sub-topics appears in Supplement B.
 
 ### 6. Link concepts to images and produce outputs
 
-Per-image mapping uses ResultsStepByStep → **0.postquestionare_all**, **1.phraseCuration**, and **4.0.imageDataCompiled**. Check image identifiers, reference ordering, and phrase-to-image links.
+The image-level stage connects each image to its original phrases, curated wording, and assigned sub-topics. It uses ResultsStepByStep → 0.postquestionare_all and 1.phraseCuration, then aligns the results to the 520-image reference list in 4.0.imageDataCompiled. Images on that list are retained even when no phrase mapping is available; a blank mapping should not be interpreted as evidence that the image lacks a particular property.
 
-- **Branch A: image compilation.** Assemble original/curated phrases, complexity directions, stems, and sub-topics for each image, with dictionary and optional reporting outputs. This branch uses PostquestionareAnalysisGPT5 → **5.1 imagePhraseCompile** for ordering.
-- **Branch B: word and stem tables.** Extract words, match phrases to images, and group related word forms. A *stem* is a simplified form used to group words; shared stems do not necessarily imply identical meaning.
+- **Image compilation (branch A)** combines the phrase mappings, complexity signs, sub-topics, and stems in an image-level table. It also produces a stem dictionary and optional reports. This branch uses PostquestionareAnalysisGPT5 → 5.1 imagePhraseCompile as its ordering reference.
+- **Word and stem tables (branch B)** extracts words from the phrase vocabulary, matches phrases to images, and groups related word forms. A stem is a shortened form used for word matching. Related forms such as “color” and “colored” can be grouped, although sharing a stem does not always mean sharing a meaning.
 
-The branches can run separately or together, but require the intermediate inputs described in Supplement C. Optional spreadsheet summaries refresh PostquestionareAnalysisGPT5 → **5.imageTypeTopics** and **2.keyword.CountByVisTypes**.
+The branches can be run separately or together. They require the intermediate files listed in Supplement C. Image-topic and visualization-type summaries can be copied back to PostquestionareAnalysisGPT5 → 5.imageTypeTopics and 2.keyword.CountByVisTypes.
 
-## 4. Interpretation and reproducibility
+## 4. Reading the results
 
-The results describe **participants' expressed perceptions**, not causal or independently validated measures of image complexity. Distinguish original evidence from curated interpretations, AI suggestions from researcher decisions, and frequency from general importance. Keep participant-comment and literature dictionary contributions distinguishable.
+The vocabulary describes what participants noticed and how they explained complexity. Original phrases provide the evidence; curated labels and sub-topics represent the researchers' interpretation. Neither a frequent phrase nor a high ranking score establishes that a feature causes complexity.
 
-Record the spreadsheet versions or saved snapshots used and retain phrase-reduction tracking. Spreadsheet edits do not automatically update local files; analysis outputs do not automatically update spreadsheets.
+The combined dictionary is reported as 689 stems: 668 derived from participant comments and 21 from the literature [2]. Those sources should remain distinguishable. Word-level matching is useful for searching and summarizing the vocabulary, but the original comment is still needed to interpret a phrase's meaning and complexity sign.
+
+Reproducing the analysis requires the code revision, the spreadsheet versions or saved snapshots, and the phrase-tracking table. Spreadsheet edits and local analysis files are synchronized by export or copy-back, not automatically.
 
 ---
 
@@ -92,7 +104,7 @@ Record the spreadsheet versions or saved snapshots used and retain phrase-reduct
 
 ## A. Exact spreadsheet and tab references
 
-The main text uses spreadsheet and tab names. The identifiers below allow collaborators to find the same tables even if a tab is later renamed.
+Spreadsheet titles and tab names were checked on November 23, 2026. A tab identifier (gid) locates a worksheet only within its spreadsheet; use both identifiers when reproducing a table reference.
 
 ### A1. PostquestionareAnalysisGPT5
 
@@ -109,8 +121,6 @@ The main text uses spreadsheet and tab names. The identifiers below allow collab
 | 2.keyword.CountByVisTypes | `1160817631` | Visualization-type keyword counts; historically labeled **A.keyword.CountByVisTypes** |
 | 5.1 imagePhraseCompile | `1429789806` | Image-order reference used by the compilation branch |
 
-The image-order reference is in this same spreadsheet, not a separate workbook.
-
 ### A2. ResultsStepByStep
 
 **Spreadsheet ID:** `1cVCOfBjHmcvsyrn7U0CbXoBSksF4JDRqWYm-ZJPbL4k`
@@ -124,7 +134,7 @@ The image-order reference is in this same spreadsheet, not a separate workbook.
 | 2.curatedPhrases | `517808299` | Curated phrase-and-count input for reduction |
 | 4.0.imageDataCompiled | `483858074` | Canonical image list for the reduction notebook's per-image output |
 
-**Important:** ResultsStepByStep → 1.phraseCuration and PostquestionareAnalysisGPT5 → 1.keyword.S&Y(AI+humanCuration) are different tabs in different spreadsheets. The earlier mapping stage and the later per-image stage read different workbook contexts.
+ResultsStepByStep → 1.phraseCuration is the mapping used by the reduction notebook's image-level section. It is separate from PostquestionareAnalysisGPT5 → 1.keyword.S&Y(AI+humanCuration), which supplies the earlier mapping stage.
 
 ### A3. Sub.Vis2025VisComplexity.PerceivedScoreAndObjectiveMetrics
 
@@ -136,8 +146,6 @@ The image-order reference is in this same spreadsheet, not a separate workbook.
 | --- | --- | --- |
 | FormalExp1800Images | `67202923` | Normalized VC values used in downstream reporting |
 
-A tab identifier is meaningful only together with its spreadsheet ID. Names above were checked against the live spreadsheets on November 23, 2026; the research counts remain the figures reported in the repository README.
-
 ### A4. VisComplexity.PerceivedScoreAndObjectiveMetrics
 
 **Spreadsheet ID:** `1eJ3VUh2ZKZy6S6qo9nzF8h0rwwMNBhwuK42wdgeS54w`
@@ -148,7 +156,7 @@ A tab identifier is meaningful only together with its spreadsheet ID. Names abov
 | --- | --- | --- |
 | FormalExp1800Images | `1073958835` | Image metadata, including visualization types used by notebook 1's image-topic section |
 
-This is a separate workbook from the similarly named VC-score reference in A3. Together with the two primary spreadsheets, these references make four workbook contexts in the implementation.
+The metadata and VC-score spreadsheets both contain a tab named FormalExp1800Images. They are separate reference tables.
 
 ## B. The 19 sub-topics
 
@@ -164,11 +172,9 @@ These labels come from the expert-defined taxonomy in the phrase-reduction noteb
 | Aesthetics Uncertainty | Visual Disorganization; Perceptual Ambiguity |
 | Immediacy / Cognitive Load | Interpretive Difficulty; Semantic Clarity; Processing Time & Effort |
 
-The nine visualization-type labels used in the implementation [1] are **Area, Bar, Cont.-ColorPatn, Glyph, Grid, Line, Node-link, Point, and Text**.
+The nine standard visualization-type labels used in summaries [1] are Area, Bar, Cont.-ColorPatn, Glyph, Grid, Line, Node-link, Point, and Text. Cont.-ColorPatn is the spreadsheet label used for Color/Pattern. Source records also include other and mixed-type labels; the nine categories are not a count of all labels in the raw study table.
 
 ## C. Technical implementation and outputs
-
-This section is for the analyst running the workflow. General readers do not need to run these notebooks.
 
 | Research stage | Implementation | Main local outputs |
 | --- | --- | --- |
@@ -179,11 +185,11 @@ This section is for the analyst running the workflow. General readers do not nee
 | Branch B: word extraction and image matching | [5_keyword_extraction.ipynb](https://github.com/mling216/vc_comment_processing/blob/HEAD/notebooks/5_keyword_extraction.ipynb) | `unique_words.csv`; `image_phrase_matching.csv`; visualization-type word tables |
 | Branch B continuation: stem extraction | [6_keyword_stems.ipynb](https://github.com/mling216/vc_comment_processing/blob/HEAD/notebooks/6_keyword_stems.ipynb) | `unique_stems*.csv`; optional phrase-lineage stem tables |
 
-Notebook 3's per-image section is required for its full image-level handoff, but can be skipped when only the shortlist and tracking outputs are needed. Notebook 1 includes legacy analysis sections, and notebook 4 includes optional reporting sections; follow their execution guides rather than assuming every cell is required.
+Notebook 3 produces the vocabulary tables before its image-level section. Notebook 4 adds image compilation and optional reports. Notebook 6's lineage section is optional and needs a separate lineage file. The execution guides identify the cells required for each output.
 
-### Inputs that need a separate handoff
+### Required intermediate files
 
-The current notebooks do not form a fully self-contained, one-click pipeline. Confirm these inputs are available in the local output folder before using the relevant downstream sections:
+Downstream analyses require the following separately supplied inputs in the local output folder:
 
 | Input file | Needed for | Handoff requirement |
 | --- | --- | --- |
@@ -192,30 +198,34 @@ The current notebooks do not form a fully self-contained, one-click pipeline. Co
 | `stem_dictionary.csv` | Notebook 4 core setup and dictionary cells | Existing or previously generated stem dictionary |
 | `phrase_lineage_all_vistypes.csv` | Notebook 6's optional lineage section | Links `original_phrase` to `final_subtopic_phrase`; not produced by the current notebook 3 cells |
 
-Notebook 2's `term_mapping_regenerated.csv` is a **wide, per-topic table**. It is not the long-format `term_mapping.csv` expected by notebooks 4 and 5. The analyst must adapt or export it into the required format before that handoff. The mapping review uses the column name `HumanCuration`, while the downstream file schema uses `HumanCurated`; these names should not be assumed identical.
+Notebook 2's `term_mapping_regenerated.csv` is a **wide, per-topic table**. Export it into the long-format `term_mapping.csv` required by notebooks 4 and 5 before that handoff. The mapping review uses the column name `HumanCuration`, while the downstream file schema uses `HumanCurated`; these names require explicit conversion.
 
-Column names are case-sensitive; the notebooks do not automatically normalize `original` to `Original`. The reported combined dictionary total in Section 1 should also be distinguished from a rerun's comment-derived stem output: the implementation's optional literature-intersection report does not by itself guarantee that all 21 literature contributions are added to that output.
+Column names are case-sensitive; the notebooks do not automatically convert `original` to `Original`.
+
+The combined 689-stem dictionary and the comment-derived stem output are different products. The optional literature-intersection report compares vocabulary with literature factors; it does not automatically add all 21 literature-derived stems to the comment dictionary.
 
 ### Storage and synchronization
 
 - The project's [data_table folder](https://github.com/mling216/vc_comment_processing/tree/HEAD/data_table) contains local snapshots of the source comparison records, earlier phrase mapping, and curated phrase table.
 - The local `data_processing` folder holds generated analysis outputs and is excluded from version control.
-- Spreadsheet edits require a corresponding local snapshot refresh if the analyst is using local data.
+- When using local data, refresh the snapshots after changing the spreadsheets.
 - Notebook outputs must be deliberately exported or copied back to the intended spreadsheet tabs.
 - The source records' `index` key must be preserved during copy-back.
 
-The data-loading mode named `master` means live Google Sheets, not that all inputs come from ResultsStepByStep. Local snapshot lookup is keyed by tab identifier only; it does not verify the supplied workbook ID. Use the workbook/tab pairs in Supplement A.
+The `master` data-loading mode reads live Google Sheets from the workbook specified for each input. Local snapshot lookup uses the tab identifier alone and does not verify the workbook ID, so the spreadsheet/tab pairs in Supplement A must be preserved.
 
-The reduction notebook uses TF-IDF, a text-weighting method, with cosine similarity to suggest phrase merges. Its rare-term consolidation treats phrases with counts of two or fewer as rare. Matching is primarily within a phrase's main topic, with a broader fallback when that topic has no surviving candidates; weak or unmatched cases can be force-merged. Those assignments merit particular attention during expert review.
+### Reduction and word processing
 
-The word-processing branch uses lemmatization to obtain word forms, followed by Snowball stemming in the stem-table notebook. The image-compilation branch also extracts stems from original phrases. These are text-processing operations, not semantic validation of the resulting dictionary.
+The reduction count is the sum of `num_images` across the topic–phrase rows for a given phrase. An image associated with that phrase under more than one topic can therefore contribute more than once. It is not a participant or comment count. The ranking score multiplies this image-association count by the number of standard visualization types containing the phrase.
 
-For environment setup, data-loading options, and execution instructions, see the [project README](https://github.com/mling216/vc_comment_processing/blob/HEAD/README.md) [2]. Notebook 1 requires access to an LLM API; notebooks 4–6 require the documented language-processing model. These operational requirements are separate from the research review steps.
+The reduction notebook treats counts below three as rare. After manual synonym merging, it uses TF-IDF to represent the remaining phrases by their words and word pairs, then compares those representations using cosine similarity. Matching normally stays within the assigned primary topic. If that topic has no more-frequent candidates, matching uses the wider candidate pool. Every remaining rare phrase receives its closest match, with low-similarity assignments recorded for review.
+
+Word extraction uses lemmatization to obtain dictionary forms of words. The stem-table notebook then uses Snowball stemming to group related forms by a common stem. The image-compilation branch also stems words from the original phrases.
+
+For environment setup, data-loading options, and execution instructions, see the [project README](https://github.com/mling216/vc_comment_processing/blob/HEAD/README.md) [2]. Notebook 1 requires access to an LLM API; notebooks 4–6 require the documented language-processing model.
 
 ## D. References
 
 1. **VC Comment Processing.** Implementation repository and analysis materials. https://github.com/mling216/vc_comment_processing
 2. **VC Comment Processing: README.** Workflow, spreadsheet checkpoints, reported counts, and execution guidance. https://github.com/mling216/vc_comment_processing/blob/HEAD/README.md
 3. **Phrase Reduction Pipeline.** Expert-defined taxonomy, consolidation, and phrase-tracking implementation. https://github.com/mling216/vc_comment_processing/blob/HEAD/notebooks/3_phrase_reduction.ipynb
-
-Spreadsheet names were checked on November 23, 2026. The references above point to the current project; a published study should additionally record the exact code revision and data snapshots used.
